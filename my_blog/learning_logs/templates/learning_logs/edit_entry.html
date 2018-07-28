@@ -1,0 +1,31 @@
+
+{% extends 'learning_logs/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-10">
+                <div>
+                    <p><a href="{% url 'learning_logs:topic' topic.id %}">{{ topic }}</a></p>
+                </div>
+                <p>编辑文章</p>
+
+                <form action="{% url 'learning_logs:edit_entry' entry.id %}" method="post">
+
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button name="submit">保存修改</button>
+                </form>
+            </div>
+            <div class="col-md-2">
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block script_extends %}
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+{% endblock %}

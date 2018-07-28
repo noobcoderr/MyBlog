@@ -1,0 +1,19 @@
+h1.index{
+    text-align: center;
+    margin-top: 1em;
+    margin-bottom: 0;
+}
+
+div#container {
+    margin: 0 auto;
+    height: 20em;
+    min-width: 20em;
+    max-width: 30em;
+}
+
+div.hot-data {
+    text-align: center;
+    margin-top: 10em;
+
+}
+

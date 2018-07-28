@@ -1,0 +1,25 @@
+{% extends 'learning_logs/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="container">
+
+        <div class="card bg-light">
+            <div class="card-header">注册</div>
+            <div class="card-body">
+                <form action="{% url 'users:register' %}" method="post">
+                    {% csrf_token %}
+                    {% for field in register_form %}　
+                        <lable for="{{ field.id_for_label }}">{{ field.label }}</lable>
+                        {{ field }}
+                        <p class="text-danger">{{ field.errors.as_text }}</p>
+                    {% endfor %}
+                    <span class="pull-left text-danger">{{ register_form.non_field_errors }}</span>
+                    <input type="submit" value="注册" class="btn btn-primary" style="margin-top: 0.5em;float: right">
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock content %}

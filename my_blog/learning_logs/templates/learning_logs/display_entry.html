@@ -1,0 +1,204 @@
+{% extends 'learning_logs/base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    {{ entry.title }}
+{% endblock title %}
+
+{% block head_extends %}
+    <link rel="stylesheet" type="text/css" href="{% static 'learning_logs/learning_logs.css' %}">
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+{% endblock head_extends %}
+
+
+{% block header %}
+    <div class="panel-heading">
+        <h3>{{ entry.title}}</h3><br>
+        <p>
+        <img src="{% static 'bootstrap4.1.1/png/calendar-2x.png' %}">{{ entry.date_added|date:'Y-m-d' }}&nbsp;&nbsp;&nbsp;&nbsp;
+        <img src="{% static 'bootstrap4.1.1/png/person-2x.png' %}">{{ entry.entry_owner }}&nbsp;&nbsp;&nbsp;&nbsp;
+        <img src="{% static 'bootstrap4.1.1/png/eye-2x.png' %}">{{ entry.get_read_num }}&nbsp;&nbsp;&nbsp;&nbsp;
+        <img src="{% static 'bootstrap4.1.1/png/comment-square-2x.png' %}">评论:0&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="{% url 'learning_logs:edit_entry' entry.id %}">重新编辑</a>&nbsp;&nbsp;&nbsp;&nbsp;
+        </p>
+    </div>
+{% endblock header %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1">
+                <div class="card">
+                    <div class="card-body">
+                        <p>
+                            {{ entry.text|safe }}
+                        </p>
+                    </div>
+
+                </div>
+                <div class="blog_more">
+                    <p>
+                        上一篇:
+                        {% if p %}
+                            <a href="{% url 'learning_logs:display_entry' p.id %}">
+                                {{ p.title }}
+                            </a>
+
+                        {% else %}
+                            已经是最新一篇了
+                        {% endif %}
+                    </p>
+                    <p>
+                        下一篇:
+                        {% if n %}
+                            <a href="{% url 'learning_logs:display_entry' n.id %}">
+                                {{ n.title }}
+                            </a>
+
+                        {% else %}
+                            已经是最后一篇了
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1" style="width: 100%">
+                <div class="comment-area" style="margin-top: 2em">
+                    <h4 style="border-bottom: 1px solid #ccc;padding-bottom: 0.4em;">评论区</h4>
+                    {% if user.is_authenticated %}
+                        <form id="comment_form" action="{% url 'comment:update_comment' %}" method="POST" style="overflow:hidden;">
+                            <label>{{ user.username }}请输入评论</label>
+                            <div id="reply_content_container" style="display:none">
+                                <p>回复:</p>
+                                <div id="reply_content"></div>
+                            </div>
+                            {% csrf_token %}
+                            {% for field in comment_form %}
+                                {{ field }}
+                            {% endfor %}
+                            <span id='comment_error' class="text-danger pull-left"></span>
+                            <input type="submit" value="发表评论" class="btn btn-primary pull-right" style="float:right">
+                        </form>
+                    {% else %}
+                        <p>
+                            您还没有登录，请登录后再发表评论
+                        </p>
+                        <p>
+                            <a class="btn btn-info" href="{% url 'users:login' %}?from={{ request.get_full_path }}">登录</a>
+                        </p>
+                        <p>
+                            还没有账号？点击<a class="btn btn-info" href="{% url 'users:register' %}?from={{ request.get_full_path }}">注册</a>
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="comment-area" style="margin-top: 2em; margin-bottom: 8em">
+                    <h4 style="border-bottom: 1px solid #ccc;padding-bottom: 0.4em;">评论列表</h4>
+                    <div id="comment_list">
+                        {% for comment in comments %}
+                            <div class="comment" style="border-bottom: 1px dashed #ccc;margin-bottom: 0.5em;padding-bottom: 0.5em;">
+                                <span>{{ comment.user.username }}</span>
+                                <span>({{ comment.comment_time|date:'Y-m-d H-i-s' }})</span>
+                                <div id="comment_{{ comment.pk }}">
+                                    {{ comment.text|safe }}
+                                </div>
+                                <a href="javascript:reply({{ comment.pk }});">回复</a>
+
+                                {% for reply in comment.root_comment.all %}
+                                    <div class="reply" style="margin-left: 2em">
+                                        <span>{{ reply.user.username }}</span>
+                                        <span>({{ reply.comment_time|date:'Y-m-d H-i-s' }})</span>
+                                        <span>回复</span>
+                                        {{ reply.reply_to.username }}:
+                                        <div id="comment_{{ reply.pk }}">
+                                            {{ reply.text|safe }}
+                                        </div>
+                                        <a href="javascript:reply({{ reply.pk }});">回复</a>
+
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% empty %}
+                            <span id="no_comment">暂无评论</span>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+{% block script_extends %}
+
+    <script type="text/javascript">
+
+{#        var comment_form = $( "#comment_form" );#}
+{#        var comment_error = $( "#comment_error" );#}
+{#        var comment_list = $("#comment_list");#}
+{#        var instances = CKEDITOR.instances['id_text'];#}
+{##}
+{#        comment_form.submit(function(){#}
+{#            // 判断是否为空#}
+{#            comment_error.text('');#}
+{#            if(CKEDITOR.instances['id_text'].document.getBody().getText().trim()===''){#}
+{#                comment_error.text('评论内容不能为空');#}
+{#                return false;#}
+{#            }#}
+{##}
+{#            // 更新数据到text_area#}
+{#            CKEDITOR.instances['id_text'].updateElement();#}
+{##}
+{#            // 异步提交#}
+{#            $.ajax({#}
+{#                url: "{% url 'comment:update_comment' %}",#}
+{#                type: 'POST',#}
+{#                data: $(this).serialize(),#}
+{#                cache: false,#}
+{#                success: function (data) {#}
+{#                    console.log(data);#}
+{#                    if(data['status']==="SUCCESS"){#}
+{#                        if($("#reply_comment_id").val()=='0'){#}
+{#                            //  插入评论#}
+{#                            var comment_html ="<div class="comment">#}
+{#                                        <span>' + data['username'] + '</span>#}
+{#                                        <span>(' + data['comment_time'] + ')</span>#}
+{#                                    <div id="comment_' + data['pk'] + '">#}
+{#                                        ' + data['text'] + '#}
+{#                                    </div>#}
+{#                                    <a href="javascript:reply(' + data['pk'] + ');">回复</a>#}
+{#                                </div>"#}
+{#                                comment_list.prepend(comment_html);#}
+{##}
+{#                        }else{#}
+{#                            // 插入回复#}
+{##}
+{#                        }#}
+{#                        // 清空编辑框的内容#}
+{#                        CKEDITOR.instances['id_text'].setData('')#}
+{#                    }else{#}
+{#                        // 显示错误信息#}
+{#                        comment_error.text(data['message']);#}
+{#                    }#}
+{#                },#}
+{#                error: function (xhr) {#}
+{#                    console.log(xhr);#}
+{#                }#}
+{#            });#}
+{#            return false;#}
+{#        });#}
+        function reply(reply_comment_id) {
+            $("#reply_comment_id").val(reply_comment_id);
+            var html = $("#comment_" + reply_comment_id).html();
+            $("#reply_content").html(html);
+            $("#reply_content_container").show();
+            $("html").animate({scrollTop: $("#comment_form").offset().ajaxStop() - 60}, 300, function(){
+                CKEDITOR.instances['id_text'].focus();
+            });
+        }
+    </script>
+{% endblock %}

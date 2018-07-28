@@ -1,0 +1,42 @@
+div.blog_more{
+    margin-top: 3em;
+}
+
+*{
+    padding:0;
+    margin: 0;
+}
+
+body{
+
+    height: 100%;
+    margin-top: 0;
+    padding: 0;
+}
+
+
+html{
+    height: 944px;
+}
+
+
+a.link-color{
+    color: black;
+}
+
+ul.entry-info{
+    list-style-type: none;
+    margin-bottom: 1em;
+}
+ul.entry-info li{
+    display: inline-block;
+    margin-right: 1em;
+}
+
+div.django-ckeditor-widget {
+    width: 100%;
+}
+
+#cke_id_text {
+    width: auto !important;
+}

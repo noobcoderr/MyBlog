@@ -1,0 +1,121 @@
+
+{% extends "learning_logs/base.html" %}
+
+{% block title %}
+    主页
+{% endblock title %}
+
+{% block header %}
+    <p>
+        <h1>主题</h1>
+        一共有{{ topics.paginator.count }}个主题
+        <a href="{% url 'learning_logs:new_topic' %}">添加一个新主题</a>
+    </p>
+
+{% endblock header %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                {% for topic in topics %}
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">
+                            <h3>
+                                <a href="{% url 'learning_logs:topic' topic.id %}">
+                                    {{ topic }}
+                                </a>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            {{ topic.abstract }}
+                        </div>
+                    </div>
+                {% empty %}
+                    <li>这里空空如也，快写点东西吧</li>
+                {% endfor %}
+
+                {# 分页功能 #}
+                <div aria-label="Page navigation example ">
+                    <ul class="pagination justify-content-center">
+                        {% if topics.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ topics.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">上一页</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link">
+                                    <span aria-hidden="true">到头啦</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+
+                        {% for page_num in topics.paginator.page_range %}
+                          {% if page_num == topics.number %}
+                              <li class="page-item active"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+                          {% else %}
+                              <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+                          {% endif %}
+                        {% endfor %}
+
+
+                        {% if topics.has_next  %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ topics.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">下一页</span>
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <a class="page-link">
+                                    <span aria-hidden="true">到尾了</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+{#                <ul>#}
+                    <div class="card border-info mb-3" style="max-width: 18rem;">
+                        <div class="card-header">
+                            博客分类
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for topic in all_topic %}
+                                <li class="list-group-item">
+                                    <a href="{% url 'learning_logs:topic' topic.id %}">
+                                        {{ topic.name }}
+                                    </a>
+                                    ({{ topic.entry_set.count }})
+                                </li>
+                            {% empty %}
+                                暂无分类
+                            {% endfor %}
+                        </ul>
+                    </div>
+{#                </ul>#}
+                    <div class="card border-info mb-3" style="max-width: 18rem;">
+                        <div class="card-header">
+                            日期归档
+                        </div>
+                        <ul class="list-group list-group-flush">
+{#                            {% for tp_date in topic_time %}#}
+{#                                <li class="list-group-item">#}
+{#                                    <a href="{% url '' %}">#}
+{#                                        {{ tp_date|date:"Y年m月" }}#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                            {% endfor %}#}
+                        </ul>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
